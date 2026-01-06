@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cek Status Wisuda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-yellow-50 min-h-screen flex flex-col items-center p-6">
+    <!-- HEADER -->
+    <div class="flex flex-col items-center mb-8 mt-4">
+      <img src="assets/logo.png" class="h-20 mb-4" alt="Logo Universitas" />
+      <h1 class="text-3xl font-bold text-yellow-700 text-center">
+        Cek Status Pendaftaran Wisuda 🎓
+      </h1>
+    </div>
+
+    <!-- FORM CEK STATUS -->
+    <div class="w-full max-w-md bg-yellow-100 p-6 rounded-xl shadow-lg">
+      <form id="cekStatusForm" class="flex gap-2">
+        <input
+          type="text"
+          id="cekNim"
+          placeholder="Masukkan NIM"
+          class="flex-1 p-2 rounded border"
+          required
+        />
+        <button
+          type="submit"
+          class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 rounded"
+        >
+          Cek
+        </button>
+      </form>
+
+      <div id="statusResult" class="mt-6 text-yellow-800 font-semibold"></div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+      const BASE_URL = "http://localhost:5000";
+
+      const cekStatusForm = document.getElementById("cekStatusForm");
+      const statusResult = document.getElementById("statusResult");
+
+      cekStatusForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const nim = document.getElementById("cekNim").value.trim();
+        if (!nim) return;
+
+        statusResult.textContent = "Memeriksa...";
+
+        try {
+          const res = await fetch(`${BASE_URL}/api/pendaftar/${nim}`);
+          const data = await res.json();
+
+          if (!res.ok) {
+            statusResult.textContent = data.message || "NIM tidak ditemukan";
+            return;
+          }
+
+          let filesHtml = "";
+          if (data.files) {
+            for (const [key, value] of Object.entries(data.files)) {
+              if (value)
+                filesHtml += `<div>
+                  <a class="text-blue-600 underline" target="_blank" href="${BASE_URL}/uploads/${value}">
+                    ${key}
+                  </a>
+                </div>`;
+            }
+          }
+
+          statusResult.innerHTML = `
+            <p><strong>Nama:</strong> ${data.nama}</p>
+            <p><strong>NIM:</strong> ${data.nim}</p>
+            <p><strong>Status:</strong> ${data.status}</p>
+            ${
+              filesHtml
+                ? "<p class='mt-2'><strong>File:</strong></p>" + filesHtml
+                : ""
+            }
+          `;
+        } catch (err) {
+          console.error(err);
+          statusResult.textContent = "Gagal cek status";
+        }
+      });
+    </script>
+  </body>
+</html>

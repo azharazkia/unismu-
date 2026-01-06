@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pendaftaran Wisuda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-yellow-50 min-h-screen flex flex-col items-center p-6">
+    <!-- Logo -->
+    <nav class="flex items-center justify-between p-4 shadow-md">
+      <img src="assets/logo.png" class="h-16" alt="Logo Universitas" />
+    </nav>
+    <h1 class="text-3xl font-bold text-yellow-700 mb-4 text-center">
+      Form Pendaftaran Wisuda 🎓
+    </h1>
+
+    <form
+      id="registerForm"
+      class="bg-yellow-100/90 p-6 rounded-xl shadow-lg w-full max-w-3xl space-y-4"
+    >
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input
+          type="text"
+          name="nama"
+          placeholder="Nama Lengkap"
+          class="p-2 rounded border w-full"
+          required
+        />
+        <input
+          type="text"
+          name="nim"
+          placeholder="NIM"
+          class="p-2 rounded border w-full"
+          required
+        />
+        <input
+          type="text"
+          name="nik"
+          placeholder="NIK"
+          class="p-2 rounded border w-full"
+          required
+        />
+        <input
+          type="text"
+          name="tempat_lahir"
+          placeholder="Tempat Lahir"
+          class="p-2 rounded border w-full"
+          required
+        />
+        <input
+          type="date"
+          name="tanggal_lahir"
+          class="p-2 rounded border w-full"
+          required
+        />
+        <input
+          type="text"
+          name="fakultas"
+          placeholder="Fakultas"
+          class="p-2 rounded border w-full"
+          required
+        />
+        <input
+          type="text"
+          name="program_studi"
+          placeholder="Program Studi"
+          class="p-2 rounded border w-full"
+          required
+        />
+        <input
+          type="text"
+          name="nama_ibu"
+          placeholder="Nama Ibu Kandung"
+          class="p-2 rounded border w-full"
+          required
+        />
+      </div>
+
+      <textarea
+        name="alamat"
+        placeholder="Alamat Domisili"
+        class="p-2 rounded border w-full"
+        required
+      ></textarea>
+
+      <h3 class="text-yellow-700 font-semibold">Lampiran</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <label class="block bg-yellow-200 p-2 rounded"
+          >KTP<input type="file" name="ktp" class="mt-1 w-full" required
+        /></label>
+        <label class="block bg-yellow-200 p-2 rounded"
+          >Akta Kelahiran<input
+            type="file"
+            name="akta"
+            class="mt-1 w-full"
+            required
+        /></label>
+        <label class="block bg-yellow-200 p-2 rounded"
+          >Kartu Keluarga<input
+            type="file"
+            name="kk"
+            class="mt-1 w-full"
+            required
+        /></label>
+        <label class="block bg-yellow-200 p-2 rounded"
+          >Bukti Pelunasan<input
+            type="file"
+            name="bukti_pelunasan"
+            class="mt-1 w-full"
+            required
+        /></label>
+        <label class="block bg-yellow-200 p-2 rounded"
+          >Skripsi<input
+            type="file"
+            name="skripsi"
+            class="mt-1 w-full"
+            required
+        /></label>
+        <label class="block bg-yellow-200 p-2 rounded"
+          >Surat Bebas Pustaka<input
+            type="file"
+            name="surat_bebas_pustaka"
+            class="mt-1 w-full"
+            required
+        /></label>
+        <label class="block bg-yellow-200 p-2 rounded"
+          >Artikel Jurnal<input
+            type="file"
+            name="artikel_jurnal"
+            class="mt-1 w-full"
+            required
+        /></label>
+      </div>
+
+      <button
+        type="submit"
+        class="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 rounded"
+      >
+        Daftar
+      </button>
+      <p id="message" class="text-center text-green-700 font-semibold mt-2"></p>
+    </form>
+
+    <script>
+      const registerForm = document.getElementById("registerForm");
+      const message = document.getElementById("message");
+
+      registerForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(registerForm);
+        try {
+          const res = await fetch("http://localhost:5000/api/pendaftar", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          message.textContent = data.message || "Berhasil mendaftar!";
+        } catch (err) {
+          message.textContent = "Gagal mendaftar.";
+          console.error(err);
+        }
+      });
+    </script>
+  </body>
+</html>

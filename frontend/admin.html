@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel Wisuda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body class="bg-yellow-50 min-h-screen p-6">
+    <div class="max-w-7xl mx-auto">
+      <h1 class="text-3xl font-bold text-yellow-700 mb-6 text-center">
+        Admin Panel Wisuda
+      </h1>
+
+      <!-- LOGIN -->
+      <div id="loginBox" class="bg-white p-6 rounded shadow max-w-md mx-auto">
+        <h2 class="text-xl font-semibold mb-4">Login Admin</h2>
+        <input
+          type="password"
+          id="adminKey"
+          class="w-full border rounded px-3 py-2 mb-4"
+          placeholder="Password Admin"
+        />
+        <button
+          id="loginBtn"
+          class="w-full bg-yellow-600 text-white py-2 rounded hover:bg-yellow-700"
+        >
+          Login
+        </button>
+        <p id="loginMsg" class="text-red-600 mt-2"></p>
+      </div>
+
+      <!-- TABLE -->
+      <div id="tableBox" class="hidden overflow-x-auto mt-6">
+        <table class="min-w-full bg-white shadow rounded text-sm">
+          <thead class="bg-yellow-600 text-white">
+            <tr>
+              <th class="p-2">Nama</th>
+              <th class="p-2">NIM</th>
+              <th class="p-2">TTL</th>
+              <th class="p-2">NIK</th>
+              <th class="p-2">Fakultas</th>
+              <th class="p-2">Prodi</th>
+              <th class="p-2">Nama Ibu</th>
+              <th class="p-2">Alamat</th>
+              <th class="p-2">File</th>
+              <th class="p-2">Status</th>
+              <th class="p-2">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const BASE_URL = "http://localhost:5000"; // sesuaikan port backend
+      const ADMIN_KEY = "rahasia123"; // sama dengan backend
+
+      const loginBtn = document.getElementById("loginBtn");
+      const loginBox = document.getElementById("loginBox");
+      const tableBox = document.getElementById("tableBox");
+      const loginMsg = document.getElementById("loginMsg");
+      const tableBody = document.getElementById("tableBody");
+
+      loginBtn.onclick = () => {
+        const key = document.getElementById("adminKey").value;
+        if (key !== ADMIN_KEY) {
+          loginMsg.textContent = "Password salah";
+          return;
+        }
+
+        loginBox.classList.add("hidden");
+        tableBox.classList.remove("hidden");
+        loadData();
+      };
+
+      async function loadData() {
+        try {
+          const res = await fetch(`${BASE_URL}/api/admin/pendaftar`, {
+            headers: { "x-admin-key": ADMIN_KEY },
+          });
+          const data = await res.json();
+          tableBody.innerHTML = "";
+
+          data.forEach((p) => {
+            const files = [
+              ["KTP", p.ktp],
+              ["Akta", p.akta],
+              ["KK", p.kk],
+              ["Bukti", p.bukti_pelunasan],
+              ["Skripsi", p.skripsi],
+              ["Bebas Pustaka", p.surat_bebas_pustaka],
+              ["Jurnal", p.artikel_jurnal],
+            ]
+              .filter((f) => f[1])
+              .map(
+                (f) =>
+                  `<a href="${BASE_URL}/uploads/${f[1]}" target="_blank" class="text-blue-600 underline block">${f[0]}</a>`
+              )
+              .join("");
+
+            tableBody.innerHTML += `
+              <tr class="border-b">
+                <td class="p-2">${p.nama}</td>
+                <td class="p-2">${p.nim}</td>
+                <td class="p-2">${p.tempat_lahir}, ${p.tanggal_lahir}</td>
+                <td class="p-2">${p.nik}</td>
+                <td class="p-2">${p.fakultas}</td>
+                <td class="p-2">${p.program_studi}</td>
+                <td class="p-2">${p.nama_ibu}</td>
+                <td class="p-2">${p.alamat}</td>
+                <td class="p-2">${files || "-"}</td>
+                <td class="p-2 font-semibold">${p.status}</td>
+                <td class="p-2 space-x-1">
+                  <button
+                    onclick="updateStatus(${p.id}, 'verified')"
+                    class="bg-green-600 text-white px-2 py-1 rounded"
+                  >
+                    Verifikasi
+                  </button>
+                  <button
+                    onclick="updateStatus(${p.id}, 'pending')"
+                    class="bg-gray-500 text-white px-2 py-1 rounded"
+                  >
+                    Pending
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+        } catch (err) {
+          console.error(err);
+          alert("Gagal mengambil data pendaftar");
+        }
+      }
+
+      async function updateStatus(id, status) {
+        try {
+          const res = await fetch(
+            `${BASE_URL}/api/admin/pendaftar/${id}/status`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                "x-admin-key": ADMIN_KEY,
+              },
+              body: JSON.stringify({ status }),
+            }
+          );
+
+          const result = await res.json();
+          if (res.ok) {
+            alert(`Status berhasil diubah menjadi ${status}`);
+            loadData(); // reload tabel
+          } else {
+            alert(result.message || "Gagal mengubah status");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Gagal mengubah status");
+        }
+      }
+    </script>
+  </body>
+</html>
